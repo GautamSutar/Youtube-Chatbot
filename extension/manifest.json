@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube AI Chatbot",
+  "version": "1.0.0",
+  "description": "Ask questions about any YouTube video you are watching in real-time using AI.",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://www.youtube.com/*",
+    "http://127.0.0.1:8000/*"
+  ],
+  "icons": {
+    "128": "icon128.png"
+  }
+}
