@@ -1,10 +1,62 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const statusBox = document.getElementById('statusBox');
+  const statusText = document.getElementById('statusText');
   const chatContainer = document.getElementById('chatContainer');
   const input = document.getElementById('questionInput');
   const sendBtn = document.getElementById('sendBtn');
   
+  const soundToggle = document.getElementById('soundToggle');
+  const soundOnIcon = document.getElementById('soundOnIcon');
+  const soundOffIcon = document.getElementById('soundOffIcon');
+  
   let currentVideoId = null;
+  let soundEnabled = true;
+
+  // Sound Setup
+  soundToggle.addEventListener('click', () => {
+    soundEnabled = !soundEnabled;
+    if (soundEnabled) {
+      soundOnIcon.style.display = 'block';
+      soundOffIcon.style.display = 'none';
+    } else {
+      soundOnIcon.style.display = 'none';
+      soundOffIcon.style.display = 'block';
+    }
+  });
+
+  function playSendSound() {
+    if (!soundEnabled) return;
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(400, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.1);
+    gain.gain.setValueAtTime(0, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.1);
+  }
+
+  function playReceiveSound() {
+    if (!soundEnabled) return;
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(800, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.2);
+    gain.gain.setValueAtTime(0, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.3);
+  }
 
   // 1. Detect YouTube Video
   try {
@@ -16,7 +68,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       currentVideoId = urlParams.get('v');
       
       if (currentVideoId) {
-        statusBox.textContent = '✅ Connected to video!';
+        statusText.textContent = 'Connected to video!';
         statusBox.className = 'status-box success';
         input.disabled = false;
         sendBtn.disabled = false;
@@ -31,7 +83,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function showError(msg) {
-    statusBox.textContent = msg;
+    statusText.textContent = msg;
     statusBox.className = 'status-box error';
     input.disabled = true;
     sendBtn.disabled = true;
@@ -84,13 +136,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const question = input.value.trim();
     if (!question || !currentVideoId) return;
 
+    playSendSound();
     appendUserMessage(question);
     input.value = '';
     
     const typingMsg = showTypingIndicator();
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/ask', {
+      const response = await fetch('https://youtube-ai-chatbot-v65i.onrender.com/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -108,11 +161,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       const data = await response.json();
+      playReceiveSound();
       appendAIMessage(data.answer);
 
     } catch (err) {
       typingMsg.remove();
-      appendAIMessage('Failed to connect to the local AI server. Make sure server.py is running on port 8000.');
+      appendAIMessage('Failed to connect to the cloud AI server.');
     }
   }
 

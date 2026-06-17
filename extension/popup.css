@@ -96,13 +96,57 @@ body::after {
   font-size: 0.85rem;
   color: #94a3b8;
   margin-bottom: 20px;
-  text-align: center;
+  text-align: left;
   backdrop-filter: blur(12px);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #a5b4fc;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  flex-shrink: 0;
+}
+
+.status-box.success .spinner {
+  display: none;
+}
+
+.status-box.error .spinner {
+  display: none;
+}
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  gap: 8px;
+  cursor: pointer;
+  color: rgba(255,255,255,0.7);
+  transition: all 0.2s ease;
+}
+
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transform: scale(1.05);
+  box-shadow: none;
+}
+
+.icon-btn svg {
+  width: 20px;
+  height: 20px;
 }
 
 .status-box.success {
@@ -286,6 +330,10 @@ button svg {
 }
 .dot:nth-child(1) { animation-delay: -0.32s; }
 .dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(15px); }
