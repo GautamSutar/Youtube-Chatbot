@@ -26,7 +26,18 @@ OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL")
 video_id = "UclrVWafRAI"
 def get_youtube_transcript(video_id):
     try: 
-        transcript_obj = YouTubeTranscriptApi().fetch(video_id, languages=["en", "hi", "ur"])
+        if os.path.exists("cookies.txt"):
+            import http.cookiejar
+            import requests
+            session = requests.Session()
+            cookie_jar = http.cookiejar.MozillaCookieJar('cookies.txt')
+            cookie_jar.load(ignore_discard=True, ignore_expires=True)
+            session.cookies.update(cookie_jar)
+            yt_api = YouTubeTranscriptApi(http_client=session)
+        else:
+            yt_api = YouTubeTranscriptApi()
+            
+        transcript_obj = yt_api.fetch(video_id, languages=["en", "hi", "ur"])
         transcript_text = " ".join([segment.text for segment in transcript_obj.snippets])
         
         print(f"\n[SUCCESS] Transcript successfully loaded!")

@@ -42,7 +42,18 @@ def format_docs(docs):
 def build_rag_chain_for_video(video_id: str):
     try:
         # 1. Fetch Transcript
-        transcript_obj = YouTubeTranscriptApi().fetch(video_id, languages=["en", "hi", "ur"])
+        if os.path.exists("cookies.txt"):
+            import http.cookiejar
+            import requests
+            session = requests.Session()
+            cookie_jar = http.cookiejar.MozillaCookieJar('cookies.txt')
+            cookie_jar.load(ignore_discard=True, ignore_expires=True)
+            session.cookies.update(cookie_jar)
+            yt_api = YouTubeTranscriptApi(http_client=session)
+        else:
+            yt_api = YouTubeTranscriptApi()
+            
+        transcript_obj = yt_api.fetch(video_id, languages=["en", "hi", "ur"])
         transcript_text = " ".join([segment.text for segment in transcript_obj.snippets])
         
         # 2. Split Text
